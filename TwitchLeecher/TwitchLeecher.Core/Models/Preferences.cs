@@ -47,6 +47,8 @@ namespace TwitchLeecher.Core.Models
 
         private string _miscExternalPlayer;
 
+        private bool _downloadMehdiMode;
+
         #endregion Fields
 
         #region Properties
@@ -109,6 +111,19 @@ namespace TwitchLeecher.Core.Models
             set
             {
                 SetProperty(ref _miscExternalPlayer, value);
+            }
+        }
+
+        public bool DownloadMehdiMode
+        {
+            get
+            {
+                return _downloadMehdiMode;
+            }
+
+            set
+            {
+                SetProperty(ref _downloadMehdiMode, value);
             }
         }
 
@@ -385,7 +400,8 @@ namespace TwitchLeecher.Core.Models
                 DownloadFileName = DownloadFileName,
                 DownloadSubfoldersForFav = DownloadSubfoldersForFav,
                 DownloadRemoveCompleted = DownloadRemoveCompleted,
-                DownloadDisableConversion = DownloadDisableConversion
+                DownloadDisableConversion = DownloadDisableConversion,
+                DownloadMehdiMode = DownloadMehdiMode
             };
 
             clone.SearchFavouriteChannels.AddRange(SearchFavouriteChannels);

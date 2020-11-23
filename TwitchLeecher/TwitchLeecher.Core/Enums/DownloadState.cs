@@ -5,6 +5,7 @@
         Queued,
         Paused,
         Downloading,
+        DownloadingChat,
         Canceled,
         Error,
         Done

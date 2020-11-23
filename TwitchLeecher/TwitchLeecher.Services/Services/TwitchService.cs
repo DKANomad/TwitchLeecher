@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -36,6 +37,7 @@ namespace TwitchLeecher.Services.Services
         private const string ACCESS_TOKEN_URL = "https://api.twitch.tv/api/vods/{0}/access_token";
         private const string ALL_PLAYLISTS_URL = "https://usher.ttvnw.net/vod/{0}.m3u8?nauthsig={1}&nauth={2}&allow_source=true&player=twitchweb&allow_spectre=true&allow_audio_only=true";
         private const string UNKNOWN_GAME_URL = "https://static-cdn.jtvnw.net/ttv-boxart/404_boxart.png";
+        private const string CHAT_URL = "https://api.twitch.tv/v5/videos/{0}/comments";
 
         private const string TEMP_PREFIX = "TL_";
 
@@ -682,6 +684,33 @@ namespace TwitchLeecher.Services.Services
 
                             cancellationToken.ThrowIfCancellationRequested();
 
+                            if (_preferencesService.CurrentPreferences.DownloadMehdiMode)
+                            {
+                                log("Download chat task has started");
+                                var fileName = Path.Combine(downloadParams.Folder, Path.GetFileNameWithoutExtension(downloadParams.FullPath));
+
+                                setStatus("Downloading Chat");
+
+                                SaveTextToFile(JsonConvert.SerializeObject(DownloadChat(downloadParams.Video.Id)), fileName + "_chat.json");
+
+                                cancellationToken.ThrowIfCancellationRequested();
+
+                                log("Download Complete...");
+                                log("Downloading metadata and thumbnail");
+
+                                setStatus("Downloading meta and thumbnail");
+
+                                var videoMetadata = GetTwitchVideoFromId(int.Parse(downloadParams.Video.Id));
+
+                                SaveTextToFile(JsonConvert.SerializeObject(videoMetadata) , fileName + "_meta.json");
+
+                                cancellationToken.ThrowIfCancellationRequested();
+
+                                SaveThumbail(videoMetadata.Thumbnail.ToString(), fileName + ".jpg");
+
+                                log("Download complete...");
+                            }
+
                             string playlistUrl = RetrievePlaylistUrlForQuality(log, quality, vodId, vodAuthInfo);
 
                             cancellationToken.ThrowIfCancellationRequested();
@@ -999,6 +1028,45 @@ namespace TwitchLeecher.Services.Services
             log(Environment.NewLine + Environment.NewLine + "Download of all video chunks complete!");
         }
 
+        public List<Comment> DownloadChat(string videoId, string cursor = null, WebClient client = null)
+        {
+            var returnValue = new List<Comment>();
+
+            if (client == null)
+            {
+                client = CreatePrivateApiWebClient();
+            }
+            else
+            {
+                // We can assume this is a recursive call so we implement a sleep to limit the amount of requests per second
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+            }
+
+            var url = CHAT_URL;
+
+            if (!string.IsNullOrWhiteSpace(cursor))
+            {
+                url += "?cursor=" + cursor;
+            }
+            
+            var response = client.DownloadString(string.Format(url, videoId));
+            var data = JsonConvert.DeserializeObject<VideoComments>(response);
+            var comments = data.comments;
+            returnValue.AddRange(comments);
+
+            if (!string.IsNullOrWhiteSpace(data._next ))
+            {
+                returnValue.AddRange(DownloadChat(videoId, data._next, client));
+            }
+
+            return returnValue;
+        }
+
+        private void SaveTextToFile(string text, string filename)
+        {
+            File.WriteAllText(filename, text);
+        }
+
         private void CleanUp(string directory, Action<string> log)
         {
             try
@@ -1122,6 +1190,12 @@ namespace TwitchLeecher.Services.Services
             }
 
             return unknownGameUri;
+        }
+
+        private void SaveThumbail(string uri, string filename)
+        {
+            var client = CreatePrivateApiWebClient();
+            client.DownloadFile(uri, filename);
         }
 
         public void InitGameThumbnails()

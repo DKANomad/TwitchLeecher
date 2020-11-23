@@ -18,10 +18,12 @@ namespace TwitchLeecher.Gui.ViewModels
         #region Fields
 
         private DownloadParameters _downloadParams;
+        private List<DownloadParameters> _downloadParamsList;
         private bool _useCustomFilename;
 
         private ICommand _chooseCommand;
         private ICommand _downloadCommand;
+        private ICommand _downloadAllCommand;
         private ICommand _cancelCommand;
 
         private readonly IDialogService _dialogService;
@@ -77,6 +79,8 @@ namespace TwitchLeecher.Gui.ViewModels
                 _downloadParams.PropertyChanged += _downloadParams_PropertyChanged;
             }
         }
+
+        public List<DownloadParameters> DownloadParamsList { get; set; }
 
         public bool UseCustomFilename
         {
@@ -223,6 +227,19 @@ namespace TwitchLeecher.Gui.ViewModels
             }
         }
 
+        public ICommand DownloadAllCommand
+        {
+            get
+            {
+                if (_downloadAllCommand == null)
+                {
+                    _downloadAllCommand = new DelegateCommand(DownloadAll);
+                }
+
+                return _downloadAllCommand;
+            }
+        }
+
         public ICommand CancelCommand
         {
             get
@@ -282,6 +299,15 @@ namespace TwitchLeecher.Gui.ViewModels
             fileName = _filenameService.EnsureExtension(fileName, currentPrefs.DownloadDisableConversion);
 
             _downloadParams.Filename = fileName;
+        }
+
+        private void DownloadAll()
+        {
+            foreach(var param in _downloadParamsList)
+            {
+                _downloadParams = param;
+                Download();
+            }
         }
 
         private void Download()

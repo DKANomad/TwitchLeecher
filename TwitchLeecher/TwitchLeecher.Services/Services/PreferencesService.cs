@@ -43,6 +43,7 @@ namespace TwitchLeecher.Services.Services
         private const string DOWNLOAD_SUBFOLDERSFORFAV_EL = "SubfoldersForFav";
         private const string DOWNLOAD_REMOVECOMPLETED_EL = "RemoveCompleted";
         private const string DOWNLOAD_DISABLECONVERSION_EL = "DisableConversion";
+        private const string DOWNLOAD_MEHDI_MODE = "DownloadMehdiMode";
 
         private const string MISC_EL = "Misc";
         private const string MISC_USEEXTERNALPLAYER_EL = "UseExternalPlayer";
@@ -219,6 +220,10 @@ namespace TwitchLeecher.Services.Services
                 XElement downloadDisableConversionEl = new XElement(DOWNLOAD_DISABLECONVERSION_EL);
                 downloadDisableConversionEl.SetValue(preferences.DownloadDisableConversion);
                 downloadEl.Add(downloadDisableConversionEl);
+
+                XElement downloadTwitchChat = new XElement(DOWNLOAD_MEHDI_MODE);
+                downloadTwitchChat.SetValue(preferences.DownloadMehdiMode);
+                downloadEl.Add(downloadTwitchChat);
 
                 // Miscellanious
                 XElement miscUseExternalPlayerEl = new XElement(MISC_USEEXTERNALPLAYER_EL);
@@ -513,6 +518,20 @@ namespace TwitchLeecher.Services.Services
                                     // Value from config file could not be loaded, use default value
                                 }
                             }
+
+                            XElement downloadTwitchChatEl = downloadEl.Element(DOWNLOAD_MEHDI_MODE);
+
+                            if (downloadTwitchChatEl != null)
+                            {
+                                try
+                                {
+                                    preferences.DownloadMehdiMode = downloadTwitchChatEl.GetValueAsBool();
+                                }
+                                catch
+                                {
+                                    // Value from config file could not be loaded, use default value
+                                }
+                            }
                         }
 
                         XElement miscEl = preferencesEl.Element(MISC_EL);
@@ -573,7 +592,8 @@ namespace TwitchLeecher.Services.Services
                 DownloadRemoveCompleted = false,
                 DownloadDisableConversion = false,
                 MiscUseExternalPlayer = false,
-                MiscExternalPlayer = null
+                MiscExternalPlayer = null,
+                DownloadMehdiMode = false
             };
 
             return preferences;

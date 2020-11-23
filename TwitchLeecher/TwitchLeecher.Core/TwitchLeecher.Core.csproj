@@ -57,6 +57,7 @@
     <Compile Include="Models\CropInfo.cs" />
     <Compile Include="Models\DownloadTask.cs" />
     <Compile Include="Models\MainWindowInfo.cs" />
+    <Compile Include="Models\TwitchChatDownload.cs" />
     <Compile Include="Models\VodAuthInfo.cs" />
     <Compile Include="Models\DownloadParameters.cs" />
     <Compile Include="Models\FilenameWildcards.cs" />

@@ -31,6 +31,7 @@ namespace TwitchLeecher.Gui.ViewModels
 
         private ICommand _viewCommand;
         private ICommand _downloadCommand;
+        private ICommand _downloadAllCommand;
         private ICommand _seachCommand;
 
         #endregion Fields
@@ -96,6 +97,19 @@ namespace TwitchLeecher.Gui.ViewModels
                 }
 
                 return _downloadCommand;
+            }
+        }
+
+        public ICommand DownloadAllCommand
+        {
+            get
+            {
+                if (_downloadAllCommand == null)
+                {
+                    _downloadAllCommand = new DelegateCommand<List<string>>(DownloadAllVideos);
+                }
+
+                return _downloadAllCommand;
             }
         }
 
@@ -203,6 +217,94 @@ namespace TwitchLeecher.Gui.ViewModels
             }
         }
 
+        private void DownloadAllVideos(List<string> Ids)
+        {
+            var downloadQueue = new List<DownloadParameters>();
+
+            try
+            {
+                foreach (var vid in Videos)
+                {
+               
+                    lock (_commandLockObject)
+                    {
+                        if (!string.IsNullOrWhiteSpace(vid.Id))
+                        {
+                            TwitchVideo video = Videos.Where(v => v.Id == vid.Id).FirstOrDefault();
+
+                            if (video != null)
+                            {
+                                VodAuthInfo vodAuthInfo = _twitchService.RetrieveVodAuthInfo(video.Id);
+
+                                if (!vodAuthInfo.Privileged && vodAuthInfo.SubOnly)
+                                {
+                                    _dialogService.ShowMessageBox("This video is sub-only! Twitch removed the ability for 3rd party software to download such videos, sorry :(", "SUB HYPE!", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+                                    return;
+                                }
+
+                                Preferences currentPrefs = _preferencesService.CurrentPreferences.Clone();
+
+                                string folder = currentPrefs.DownloadSubfoldersForFav && _preferencesService.IsChannelInFavourites(video.Channel)
+                                    ? Path.Combine(currentPrefs.DownloadFolder, video.Channel)
+                                    : currentPrefs.DownloadFolder;
+
+                                string filename = _filenameService.SubstituteWildcards(currentPrefs.DownloadFileName, video);
+                                filename = _filenameService.EnsureExtension(filename, currentPrefs.DownloadDisableConversion);
+
+                                DownloadParameters downloadParams = new DownloadParameters(video, vodAuthInfo, video.Qualities.First(), folder, filename, currentPrefs.DownloadDisableConversion);
+
+                                downloadQueue.Add(downloadParams);
+
+                                //_navigationService.ShowDownload(downloadParams);
+                            }
+                        }
+                    }
+                }
+
+                DownloadAll(downloadQueue);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowAndLogException(ex);
+            }
+        }
+
+        private void DownloadAll(List<DownloadParameters> downloadParamsList)
+        {
+            try
+            {
+                foreach (var downloadParams in downloadParamsList)
+                {
+                    lock (_commandLockObject)
+                    {
+                        Validate();
+
+                        if (!HasErrors)
+                        {
+                            if (File.Exists(downloadParams.FullPath))
+                            {
+                                MessageBoxResult result = _dialogService.ShowMessageBox("The file already exists. Do you want to overwrite it?", "Download", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                                if (result != MessageBoxResult.Yes)
+                                {
+                                    return;
+                                }
+                            }
+
+                            _twitchService.Enqueue(downloadParams);
+                            _navigationService.ShowDownloads();
+                            //_notificationService.ShowNotification("Download added");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowAndLogException(ex);
+            }
+        }
+
         public void ShowSearch()
         {
             try
@@ -228,6 +330,7 @@ namespace TwitchLeecher.Gui.ViewModels
             }
 
             menuCommands.Add(new MenuCommand(SeachCommnad, "New Search", "Search"));
+            menuCommands.Add(new MenuCommand(DownloadAllCommand, "Download All", "Search"));
 
             return menuCommands;
         }
