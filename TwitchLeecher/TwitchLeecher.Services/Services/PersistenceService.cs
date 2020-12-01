@@ -8,6 +8,7 @@ using System.Text;
 using TwitchLeecher.Core.Data;
 using TwitchLeecher.Core.Models;
 using TwitchLeecher.Services.Interfaces;
+using TwitchLeecher.Shared.IO;
 using TwitchLeecher.Shared.Notification;
 
 namespace TwitchLeecher.Services.Services
@@ -16,10 +17,15 @@ namespace TwitchLeecher.Services.Services
     {
         #region Constants
         const string DATABASE_NAME = "database.sqlite";
-        const string CONNECTION_STRING = "Data Source=database.sqlite";
+        const string DATA_DIR = "data";
         #endregion
 
         #region Fields
+        private readonly IFolderService _folderService;
+        private readonly string _dataDir;
+
+        string _connectionString = "";
+
         private ObservableCollection<TwitchVideoDownload> _downloads;
         private ObservableCollection<TwitchVideoDownload> _failedDownloads;
 
@@ -29,10 +35,15 @@ namespace TwitchLeecher.Services.Services
 
         #region Constructors
 
-        public PersistenceService()
+        public PersistenceService(
+            IFolderService folderService)
         {
+            _folderService = folderService;
+
             _downloads = new ObservableCollection<TwitchVideoDownload>();
             _failedDownloads = new ObservableCollection<TwitchVideoDownload>();
+
+            _dataDir = Path.Combine(_folderService.GetAppDataFolder(), DATA_DIR);
         }
 
         #endregion
@@ -41,13 +52,18 @@ namespace TwitchLeecher.Services.Services
 
         public void InitialiseTables()
         {
-            if (!File.Exists(DATABASE_NAME))
+            FileSystem.CreateDirectory(_dataDir);
+            var path = Path.Combine(_dataDir, DATABASE_NAME);
+
+            if (!File.Exists(path))
             {
-                var fs = File.Create(DATABASE_NAME);
+                var fs = File.Create(path);
                 fs.Close();
             }
 
-            var db = new SQLiteConnection(CONNECTION_STRING);
+            _connectionString = $"Data Source={path}";
+
+            var db = new SQLiteConnection(_connectionString);
 
             var downloadSql = "CREATE TABLE IF NOT EXISTS Downloads (" +
                                     "ID INTEGER PRIMARY KEY, " +
@@ -217,7 +233,7 @@ namespace TwitchLeecher.Services.Services
 
         private void Transact(string sqlString, TransactionDelegate transactionDelegate)
         {
-            using (var connection = new SQLiteConnection(CONNECTION_STRING))
+            using (var connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
 
@@ -237,7 +253,7 @@ namespace TwitchLeecher.Services.Services
 
         private long TransactNonQuery(string sqlString, TransactionNonQueryDelegate transactionDelegate)
         {
-            using (var connection = new SQLiteConnection(CONNECTION_STRING))
+            using (var connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
                 long result;

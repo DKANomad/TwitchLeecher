@@ -47,6 +47,9 @@
         <File Id="TL_Ninject.dll" KeyPath="yes" Source="$(var.TL_SOURCE_DIR)Ninject.dll" />
       </Component>
       <Component Directory="INSTALLDIR">
+        <File Id="System.Data.SQLite.dll" KeyPath="yes" Source="$(var.TL_SOURCE_DIR)System.Data.SQLite.dll" />
+      </Component>
+      <Component Directory="INSTALLDIR">
         <File Id="TL_TwitchLeecher.Core.dll" KeyPath="yes" Source="$(var.TL_SOURCE_DIR)TwitchLeecher.Core.dll" />
       </Component>
       <Component Directory="INSTALLDIR">
