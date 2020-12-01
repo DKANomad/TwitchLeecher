@@ -71,18 +71,23 @@ namespace TwitchLeecher.Gui.Services
             Navigate(vm);
         }
 
-        public void ShowDownload(List<DownloadParameters> downloadParams)
-        {
-            DownloadViewVM vm = _kernel.Get<DownloadViewVM>();
-            vm.DownloadParamsList = downloadParams ?? throw new ArgumentNullException(nameof(downloadParams));
-        }
-
         public void ShowDownloads()
         {
             if (!_persistentViews.TryGetValue(typeof(DownloadsViewVM), out ViewModelBase vm))
             {
                 vm = _kernel.Get<DownloadsViewVM>();
                 _persistentViews.Add(typeof(DownloadsViewVM), vm);
+            }
+
+            Navigate(vm);
+        }
+
+        public void ShowFailedDownloads()
+        {
+            if (!_persistentViews.TryGetValue(typeof(FailedDownloadsViewVM), out ViewModelBase vm))
+            {
+                vm = _kernel.Get<FailedDownloadsViewVM>();
+                _persistentViews.Add(typeof(FailedDownloadsViewVM), vm);
             }
 
             Navigate(vm);

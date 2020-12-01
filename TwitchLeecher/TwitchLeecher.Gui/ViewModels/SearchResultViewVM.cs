@@ -292,7 +292,7 @@ namespace TwitchLeecher.Gui.ViewModels
                                 }
                             }
 
-                            _twitchService.Enqueue(downloadParams);
+                            _twitchService.Enqueue(downloadParams, true);
                             _navigationService.ShowDownloads();
                             //_notificationService.ShowNotification("Download added");
                         }

@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using TwitchLeecher.Core.Data;
 using TwitchLeecher.Core.Enums;
 using TwitchLeecher.Core.Events;
 using TwitchLeecher.Core.Models;
@@ -61,8 +62,8 @@ namespace TwitchLeecher.Services.Services
 
         private IPreferencesService _preferencesService;
         private IProcessingService _processingService;
-        private IRuntimeDataService _runtimeDataService;
         private IEventAggregator _eventAggregator;
+        private IPersistenceService _persistenceService;
 
         private Timer _downloadTimer;
 
@@ -76,6 +77,8 @@ namespace TwitchLeecher.Services.Services
 
         private volatile bool _paused;
 
+        private bool _cancelFromShutdown = false;
+
         #endregion Fields
 
         #region Constructors
@@ -83,13 +86,13 @@ namespace TwitchLeecher.Services.Services
         public TwitchService(
             IPreferencesService preferencesService,
             IProcessingService processingService,
-            IRuntimeDataService runtimeDataService,
-            IEventAggregator eventAggregator)
+            IEventAggregator eventAggregator,
+            IPersistenceService persistenceService)
         {
             _preferencesService = preferencesService;
             _processingService = processingService;
-            _runtimeDataService = runtimeDataService;
             _eventAggregator = eventAggregator;
+            _persistenceService = persistenceService;
 
             _videos = new ObservableCollection<TwitchVideo>();
             _videos.CollectionChanged += Videos_CollectionChanged;
@@ -600,7 +603,7 @@ namespace TwitchLeecher.Services.Services
             return null;
         }
 
-        public void Enqueue(DownloadParameters downloadParams)
+        public void Enqueue(DownloadParameters downloadParams, bool createDownloadRecord = false, string id = null)
         {
             if (_paused)
             {
@@ -609,7 +612,15 @@ namespace TwitchLeecher.Services.Services
 
             lock (_changeDownloadLockObject)
             {
-                _downloads.Add(new TwitchVideoDownload(downloadParams));
+          
+                var download = new TwitchVideoDownload(downloadParams, id);
+                _downloads.Add(download);
+
+                if (_preferencesService.CurrentPreferences.DownloadRememberQueue && createDownloadRecord)
+                {
+                    var downloadRecord = new DownloadRecord(download);
+                    _persistenceService.AddDownloadRecord(ref downloadRecord);
+                }
             }
         }
 
@@ -634,7 +645,8 @@ namespace TwitchLeecher.Services.Services
             {
                 try
                 {
-                    if (!_downloads.Where(d => d.DownloadState == DownloadState.Downloading).Any())
+                    if ((_preferencesService.CurrentPreferences.DownloadMultipleDownloads && _downloads.Where(q => q.DownloadState == DownloadState.Downloading).Count() < _preferencesService.CurrentPreferences.DownloadMaxDownloadTasks) || 
+                        !_downloads.Where(d => d.DownloadState == DownloadState.Downloading).Any())
                     {
                         TwitchVideoDownload download = _downloads.Where(d => d.DownloadState == DownloadState.Queued).FirstOrDefault();
 
@@ -746,6 +758,11 @@ namespace TwitchLeecher.Services.Services
 
                             bool success = false;
 
+                            if (!_cancelFromShutdown)
+                            {
+                                _persistenceService.DeleteDownloadRecord(downloadId);
+                            }
+
                             if (task.IsFaulted)
                             {
                                 setDownloadState(DownloadState.Error);
@@ -755,6 +772,9 @@ namespace TwitchLeecher.Services.Services
                                 {
                                     log(Environment.NewLine + Environment.NewLine + task.Exception.ToString());
                                 }
+
+                                var failedRecord = new FailedRecord(download);
+                                _persistenceService.AddFailedRecord(ref failedRecord);
                             }
                             else if (task.IsCanceled)
                             {
@@ -835,7 +855,8 @@ namespace TwitchLeecher.Services.Services
 
             if (Directory.EnumerateFileSystemEntries(tempDir).Any())
             {
-                throw new ApplicationException("Temporary download directory '" + tempDir + "' is not empty!");
+                log(Environment.NewLine + Environment.NewLine + "Starting temporary download folder cleanup!");
+                CleanDirectory(tempDir, log);
             }
         }
 
@@ -1080,6 +1101,29 @@ namespace TwitchLeecher.Services.Services
             }
         }
 
+        private void CleanDirectory(string directory, Action<string> log)
+        {
+            try
+            {
+                log(Environment.NewLine + "Cleaning directory from previous attempt '" + directory + "'...");
+                var di = new DirectoryInfo(directory);
+                foreach (var file in di.GetFiles())
+                {
+                    file.Delete();
+                }
+
+                foreach (var dir in di.GetDirectories())
+                {
+                    dir.Delete();
+                }
+
+                log(" done!");
+            }
+            catch
+            {
+            }
+        }
+
         public void Cancel(string id)
         {
             lock (_changeDownloadLockObject)
@@ -1299,6 +1343,11 @@ namespace TwitchLeecher.Services.Services
             _downloadTimer.Change(0, TIMER_INTERVALL);
         }
 
+        public bool IsPaused()
+        {
+            return _paused;
+        }
+
         public bool CanShutdown()
         {
             Monitor.Enter(_changeDownloadLockObject);
@@ -1316,6 +1365,8 @@ namespace TwitchLeecher.Services.Services
         public void Shutdown()
         {
             Pause();
+
+            _cancelFromShutdown = true;
 
             foreach (DownloadTask downloadTask in _downloadTasks.Values)
             {

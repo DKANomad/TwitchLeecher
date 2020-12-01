@@ -47,6 +47,9 @@ namespace TwitchLeecher
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
             ServicePointManager.DefaultConnectionLimit = 10;
 
+            // Initialise the tables for persistent storage
+            _kernel.Get<IPersistenceService>().InitialiseTables();
+
             MainWindow = _kernel.Get<MainWindow>();
             MainWindow.Show();
         }

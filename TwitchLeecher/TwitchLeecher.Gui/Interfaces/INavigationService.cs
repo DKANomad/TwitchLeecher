@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using TwitchLeecher.Core.Models;
+﻿using TwitchLeecher.Core.Models;
 
 namespace TwitchLeecher.Gui.Interfaces
 {
@@ -15,9 +14,9 @@ namespace TwitchLeecher.Gui.Interfaces
 
         void ShowDownload(DownloadParameters downloadParams);
 
-        void ShowDownload(List<DownloadParameters> downloadParamsList);
-
         void ShowDownloads();
+
+        void ShowFailedDownloads();
 
         void ShowPreferences();
 

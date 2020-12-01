@@ -49,6 +49,16 @@ namespace TwitchLeecher.Core.Models
 
         private bool _downloadMehdiMode;
 
+        private string _appApiKey;
+
+        private string _appWebApiKey;
+
+        private bool _downloadRememberQueue;
+
+        private bool _downloadMultipleDownloads;
+
+        private int _downloadMaxDownloadTasks;
+
         #endregion Fields
 
         #region Properties
@@ -284,6 +294,66 @@ namespace TwitchLeecher.Core.Models
             }
         }
 
+        public string AppApiKey
+        {
+            get
+            {
+                return _appApiKey;
+            }
+            set
+            {
+                SetProperty(ref _appApiKey, value);
+            }
+        }
+
+        public string AppWebApiKey
+        {
+            get
+            {
+                return _appWebApiKey;
+            }
+            set
+            {
+                SetProperty(ref _appWebApiKey, value);
+            }
+        }
+
+        public bool DownloadRememberQueue
+        {
+            get
+            {
+                return _downloadRememberQueue;
+            }
+            set
+            {
+                SetProperty(ref _downloadRememberQueue, value);
+            }
+        }
+
+        public bool DownloadMultipleDownloads
+        {
+            get
+            {
+                return _downloadMultipleDownloads;
+            }
+            set
+            {
+                SetProperty(ref _downloadMultipleDownloads, value);
+            }
+        }
+
+        public int DownloadMaxDownloadTasks
+        {
+            get
+            {
+                return _downloadMaxDownloadTasks;
+            }
+            set
+            {
+                SetProperty(ref _downloadMaxDownloadTasks, value);
+            }
+        }
+
         #endregion Properties
 
         #region Methods
@@ -378,6 +448,20 @@ namespace TwitchLeecher.Core.Models
                     AddError(currentProperty, $"Filename contains invalid characters ({invalidChars}.)!");
                 }
             }
+
+            currentProperty = nameof(DownloadMaxDownloadTasks);
+
+            if (DownloadMultipleDownloads)
+            {
+                if (DownloadMaxDownloadTasks <= 1)
+                {
+                    AddError(currentProperty, "Please specify a number higher than 1");
+                }
+                else if (DownloadMaxDownloadTasks > 6)
+                {
+                    AddError(currentProperty, "Please specify a number lower than 6");
+                }
+            }
         }
 
         public Preferences Clone()
@@ -401,7 +485,12 @@ namespace TwitchLeecher.Core.Models
                 DownloadSubfoldersForFav = DownloadSubfoldersForFav,
                 DownloadRemoveCompleted = DownloadRemoveCompleted,
                 DownloadDisableConversion = DownloadDisableConversion,
-                DownloadMehdiMode = DownloadMehdiMode
+                DownloadMehdiMode = DownloadMehdiMode,
+                AppWebApiKey = AppWebApiKey,
+                AppApiKey = AppApiKey,
+                DownloadRememberQueue = DownloadRememberQueue,
+                DownloadMaxDownloadTasks = DownloadMaxDownloadTasks,
+                DownloadMultipleDownloads = DownloadMultipleDownloads
             };
 
             clone.SearchFavouriteChannels.AddRange(SearchFavouriteChannels);

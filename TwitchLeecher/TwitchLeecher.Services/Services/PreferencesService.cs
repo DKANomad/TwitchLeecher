@@ -26,6 +26,8 @@ namespace TwitchLeecher.Services.Services
         private const string APP_EL = "Application";
         private const string APP_CHECKFORUPDATES_EL = "CheckForUpdates";
         private const string APP_SHOWDONATIONBUTTON_EL = "ShowDonationButton";
+        private const string APP_API_KEY = "AppApiKey";
+        private const string WEB_API_KEY = "WebApiKey";
 
         private const string SEARCH_EL = "Search";
         private const string SEARCH_FAVCHANNELS_EL = "FavChannels";
@@ -44,6 +46,9 @@ namespace TwitchLeecher.Services.Services
         private const string DOWNLOAD_REMOVECOMPLETED_EL = "RemoveCompleted";
         private const string DOWNLOAD_DISABLECONVERSION_EL = "DisableConversion";
         private const string DOWNLOAD_MEHDI_MODE = "DownloadMehdiMode";
+        private const string DOWNLOAD_REMEMBER_QUEUE = "RememberQueue";
+        private const string DOWNLOAD_ALLOW_MULTIPLE = "AllowMultipleDownloads";
+        private const string DOWNLOAD_MAX_DOWNLOAD_TASKS = "MaxDownloadTasks";
 
         private const string MISC_EL = "Misc";
         private const string MISC_USEEXTERNALPLAYER_EL = "UseExternalPlayer";
@@ -150,6 +155,14 @@ namespace TwitchLeecher.Services.Services
                 appShowDonationButtonEl.SetValue(preferences.AppShowDonationButton);
                 appEl.Add(appShowDonationButtonEl);
 
+                XElement appApiKeyEl = new XElement(APP_API_KEY);
+                appApiKeyEl.SetValue(preferences.AppApiKey);
+                appEl.Add(appApiKeyEl);
+
+                XElement appWebApiEl = new XElement(WEB_API_KEY);
+                appWebApiEl.SetValue(preferences.AppWebApiKey);
+                appEl.Add(appWebApiEl);
+
                 // Search
                 RangeObservableCollection<string> favChannels = preferences.SearchFavouriteChannels;
 
@@ -224,6 +237,18 @@ namespace TwitchLeecher.Services.Services
                 XElement downloadTwitchChat = new XElement(DOWNLOAD_MEHDI_MODE);
                 downloadTwitchChat.SetValue(preferences.DownloadMehdiMode);
                 downloadEl.Add(downloadTwitchChat);
+
+                XElement downloadRememberQueueEl = new XElement(DOWNLOAD_REMEMBER_QUEUE);
+                downloadRememberQueueEl.SetValue(preferences.DownloadRememberQueue);
+                downloadEl.Add(downloadRememberQueueEl);
+
+                XElement downloadAllowMultipleDownloadsEl = new XElement(DOWNLOAD_ALLOW_MULTIPLE);
+                downloadAllowMultipleDownloadsEl.SetValue(preferences.DownloadMultipleDownloads);
+                downloadEl.Add(downloadAllowMultipleDownloadsEl);
+
+                XElement downloadMaxDownloadTasksEl = new XElement(DOWNLOAD_MAX_DOWNLOAD_TASKS);
+                downloadMaxDownloadTasksEl.SetValue(preferences.DownloadMaxDownloadTasks);
+                downloadEl.Add(downloadMaxDownloadTasksEl);
 
                 // Miscellanious
                 XElement miscUseExternalPlayerEl = new XElement(MISC_USEEXTERNALPLAYER_EL);
@@ -303,6 +328,34 @@ namespace TwitchLeecher.Services.Services
                                 try
                                 {
                                     preferences.AppShowDonationButton = appShowDonationButtonEl.GetValueAsBool();
+                                }
+                                catch
+                                {
+                                    // Value from config file could not be loaded, use default value
+                                }
+                            }
+
+                            XElement appApiKeyEl = appEl.Element(APP_API_KEY);
+
+                            if (appApiKeyEl != null)
+                            {
+                                try
+                                {
+                                    preferences.AppApiKey = appApiKeyEl.GetValueAsString();
+                                }
+                                catch
+                                {
+                                    // Value from config file could not be loaded, use default value
+                                }
+                            }
+
+                            XElement appWebApiKeyEl = appEl.Element(WEB_API_KEY);
+
+                            if (appWebApiKeyEl != null)
+                            {
+                                try
+                                {
+                                    preferences.AppWebApiKey = appWebApiKeyEl.GetValueAsString();
                                 }
                                 catch
                                 {
@@ -532,6 +585,48 @@ namespace TwitchLeecher.Services.Services
                                     // Value from config file could not be loaded, use default value
                                 }
                             }
+
+                            XElement downloadRememberQueueEl = downloadEl.Element(DOWNLOAD_REMEMBER_QUEUE);
+                            
+                            if (downloadRememberQueueEl != null)
+                            {
+                                try
+                                {
+                                    preferences.DownloadRememberQueue = downloadRememberQueueEl.GetValueAsBool();
+                                }
+                                catch
+                                {
+                                    // Value from config file could not be loaded, use default value
+                                }
+                            }
+
+                            XElement downloadAlloweMultpleEl = downloadEl.Element(DOWNLOAD_ALLOW_MULTIPLE);
+
+                            if (downloadAlloweMultpleEl != null)
+                            {
+                                try
+                                {
+                                    preferences.DownloadMultipleDownloads = downloadAlloweMultpleEl.GetValueAsBool();
+                                }
+                                catch
+                                {
+                                    // Value from config file could not be loaded, use default value
+                                }
+                            }
+
+                            XElement downloadMaxDownloadTasksEl = downloadEl.Element(DOWNLOAD_MAX_DOWNLOAD_TASKS);
+
+                            if (downloadMaxDownloadTasksEl != null)
+                            {
+                                try
+                                {
+                                    preferences.DownloadMaxDownloadTasks = downloadMaxDownloadTasksEl.GetValueAsInt();
+                                }
+                                catch
+                                {
+                                    // Value from config file could not be loaded, use default value
+                                }
+                            }
                         }
 
                         XElement miscEl = preferencesEl.Element(MISC_EL);
@@ -593,8 +688,13 @@ namespace TwitchLeecher.Services.Services
                 DownloadDisableConversion = false,
                 MiscUseExternalPlayer = false,
                 MiscExternalPlayer = null,
-                DownloadMehdiMode = false
-            };
+                DownloadMehdiMode = false,
+                AppApiKey = "37v97169hnj8kaoq8fs3hzz8v6jezdj",
+                AppWebApiKey = "kimne78kx3ncx6brgo4mv6wki5h1ko",
+                DownloadRememberQueue = false,
+                DownloadMaxDownloadTasks = 2,
+                DownloadMultipleDownloads = false
+        };
 
             return preferences;
         }

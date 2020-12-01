@@ -46,6 +46,10 @@
                     <RowDefinition SharedSizeGroup="r1" />
                     <RowDefinition Height="10" />
                     <RowDefinition SharedSizeGroup="r1" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition SharedSizeGroup="r1" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition SharedSizeGroup="r1" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -81,6 +85,26 @@
                         </ToolTip>
                     </fa:ImageAwesome.ToolTip>
                 </fa:ImageAwesome>
+
+                <Grid Grid.Row="4" Grid.ColumnSpan="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="g2" />
+                        <ColumnDefinition Width="15" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Application ID" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                    <ComboBox Grid.Column="2" IsEditable="True" Text="{Binding CurrentPreferences.AppApiKey, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding CurrentPreferences.AppApiKey}" VerticalAlignment="Center" />
+                </Grid>
+
+                <Grid Grid.Row="6" Grid.ColumnSpan="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="g2" />
+                        <ColumnDefinition Width="15" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Api Key" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                    <ComboBox Grid.Column="2" IsEditable="True" Text="{Binding CurrentPreferences.AppWebApiKey, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding CurrentPreferences.AppWebApiKey}" VerticalAlignment="Center" />
+                </Grid>
             </Grid>
 
             <Border Grid.Row="2" Margin="0, 20, 0, 10" Padding="0,0,0,5" BorderThickness="0,0,0,1">
@@ -212,6 +236,12 @@
 
             <Grid Grid.Row="5" Margin="15,0,0,0">
                 <Grid.RowDefinitions>
+                    <RowDefinition SharedSizeGroup="r1" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition SharedSizeGroup="r1" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition SharedSizeGroup="r1" />
+                    <RowDefinition Height="10" />
                     <RowDefinition SharedSizeGroup="r1" />
                     <RowDefinition Height="10" />
                     <RowDefinition SharedSizeGroup="r1" />
@@ -427,6 +457,56 @@
                                 <TextBlock Style="{StaticResource TlToolTipHeadlineText}" Text="Mehdi Mode" />
                                 <TextBlock TextAlignment="Justify">
                                         Downlaod the chat, thumbnail and metadata for this VOD
+                                </TextBlock>
+                            </StackPanel>
+                        </ToolTip>
+                    </fa:ImageAwesome.ToolTip>
+                </fa:ImageAwesome>
+
+                <CheckBox Grid.Row="14" Grid.Column="2" Content="Remember Download Queue" IsChecked="{Binding CurrentPreferences.DownloadRememberQueue}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <fa:ImageAwesome Grid.Row="14" Grid.Column="4" Style="{StaticResource Img_Help}">
+                    <fa:ImageAwesome.ToolTip>
+                        <ToolTip Width="350">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource TlToolTipHeadlineText}" Text="Remember Download Queue" />
+                                <TextBlock TextAlignment="Justify">
+                                        Keeps track of the queue and restores it if you close and reopen the app.
+                                </TextBlock>
+                            </StackPanel>
+                        </ToolTip>
+                    </fa:ImageAwesome.ToolTip>
+                </fa:ImageAwesome>
+
+                <CheckBox Name="DownloadMultiple" Grid.Row="16" Grid.Column="2" Content="Download multiple videos" IsChecked="{Binding CurrentPreferences.DownloadMultipleDownloads}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <fa:ImageAwesome Grid.Row="16" Grid.Column="4" Style="{StaticResource Img_Help}">
+                    <fa:ImageAwesome.ToolTip>
+                        <ToolTip Width="350">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource TlToolTipHeadlineText}" Text="Download multiple videos" />
+                                <TextBlock TextAlignment="Justify">
+                                        Enable the application to download more than one video at once (Only for people with good PCs).
+                                </TextBlock>
+                            </StackPanel>
+                        </ToolTip>
+                    </fa:ImageAwesome.ToolTip>
+                </fa:ImageAwesome>
+
+                <Grid Grid.Row="18" Grid.ColumnSpan="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="g2" />
+                        <ColumnDefinition Width="15" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Max Download Tasks" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                    <ComboBox Grid.Column="2" IsEnabled="{Binding IsChecked, ElementName=DownloadMultiple}" IsEditable="True" Text="{Binding CurrentPreferences.DownloadMaxDownloadTasks, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding CurrentPreferences.AppWebApiKey}" VerticalAlignment="Center" />
+                </Grid>
+                <fa:ImageAwesome Grid.Row="18" Grid.Column="4" Style="{StaticResource Img_Help}">
+                    <fa:ImageAwesome.ToolTip>
+                        <ToolTip Width="350">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource TlToolTipHeadlineText}" Text="Max Download Tasks" />
+                                <TextBlock TextAlignment="Justify">
+                                        Set the max amount of simultaneous downloads. NOTE: The more downloads the more resources the application will conmsume. (MIN 2, MAX 6)
                                 </TextBlock>
                             </StackPanel>
                         </ToolTip>

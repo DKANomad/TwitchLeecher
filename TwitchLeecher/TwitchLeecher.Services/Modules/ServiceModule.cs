@@ -18,6 +18,7 @@ namespace TwitchLeecher.Services.Modules
             Bind<IRuntimeDataService>().To<RuntimeDataService>().InSingletonScope();
             Bind<ITwitchService>().To<TwitchService>().InSingletonScope();
             Bind<IUpdateService>().To<UpdateService>().InSingletonScope();
+            Bind<IPersistenceService>().To<PersistenceService>().InSingletonScope();
         }
 
         #endregion Methods

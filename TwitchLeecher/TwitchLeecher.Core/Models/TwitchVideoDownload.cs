@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Text;
 using TwitchLeecher.Core.Enums;
 using TwitchLeecher.Shared.Notification;
@@ -28,9 +29,37 @@ namespace TwitchLeecher.Core.Models
 
         #region Constructors
 
-        public TwitchVideoDownload(DownloadParameters downloadParams)
+        [JsonConstructor]
+        public TwitchVideoDownload(
+            string id, 
+            DownloadParameters downloadParams, 
+            DownloadState downloadState, 
+            string log, 
+            double progress, 
+            string status, 
+            bool isIndeterminate) 
         {
-            Id = Guid.NewGuid().ToString();
+            Id = id;
+            DownloadParams = downloadParams;
+            DownloadState = downloadState;
+            Progress = progress;
+            Status = status;
+            IsIndeterminate = isIndeterminate;
+
+            _log = new StringBuilder();
+
+            _downloadStateLockObject = new object();
+            _logLockObject = new object();
+            _progressLockObject = new object();
+            _statusLockObject = new object();
+            _isIndeterminateLockObject = new object();
+
+            AppendLog(log);
+        }
+
+        public TwitchVideoDownload(DownloadParameters downloadParams, string id = null)
+        {
+            Id = !string.IsNullOrWhiteSpace(id) ? id : Guid.NewGuid().ToString();
             DownloadParams = downloadParams ?? throw new ArgumentNullException(nameof(downloadParams));
 
             _log = new StringBuilder();

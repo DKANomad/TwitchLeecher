@@ -23,12 +23,14 @@ namespace TwitchLeecher.Gui.ViewModels
         private readonly INavigationService _navigationService;
         private readonly IEventAggregator _eventAggregator;
         private readonly IPreferencesService _preferencesService;
+        private readonly IPersistenceService _persistenceService;
 
         private ICommand _retryDownloadCommand;
         private ICommand _cancelDownloadCommand;
         private ICommand _removeDownloadCommand;
         private ICommand _showLogCommand;
         private ICommand _openDownloadFolderCommand;
+        private ICommand _openFailedDownloadsCommand;
 
         private readonly object _commandLockObject;
 
@@ -41,13 +43,15 @@ namespace TwitchLeecher.Gui.ViewModels
             IDialogService dialogService,
             INavigationService navigationService,
             IEventAggregator eventAggregator,
-            IPreferencesService preferencesService)
+            IPreferencesService preferencesService,
+            IPersistenceService persistenceService)
         {
             _twitchService = twitchService;
             _dialogService = dialogService;
             _navigationService = navigationService;
             _eventAggregator = eventAggregator;
             _preferencesService = preferencesService;
+            _persistenceService = persistenceService;
 
             _twitchService.PropertyChanged += TwitchService_PropertyChanged;
 
@@ -65,6 +69,14 @@ namespace TwitchLeecher.Gui.ViewModels
             get
             {
                 return _twitchService.Downloads;
+            }
+        }
+
+        public bool DownloadsPaused
+        {
+            get
+            {
+                return _twitchService.IsPaused();
             }
         }
 
@@ -133,6 +145,19 @@ namespace TwitchLeecher.Gui.ViewModels
             }
         }
 
+        public ICommand OpenFailedDownloadsCommand
+        {
+            get
+            {
+                if (_openFailedDownloadsCommand == null)
+                {
+                    _openFailedDownloadsCommand = new DelegateCommand(OpenFailedDownloads);
+                }
+
+                return _openFailedDownloadsCommand;
+            }
+        }
+
         #endregion Properties
 
         #region Methods
@@ -182,6 +207,7 @@ namespace TwitchLeecher.Gui.ViewModels
                     if (!string.IsNullOrWhiteSpace(id))
                     {
                         _twitchService.Remove(id);
+                        _persistenceService.DeleteDownloadRecord(id);
                     }
                 }
             }
@@ -262,6 +288,21 @@ namespace TwitchLeecher.Gui.ViewModels
             }
         }
 
+        private void OpenFailedDownloads()
+        {
+            try
+            {
+                lock(_commandLockObject)
+                {
+                    _navigationService.ShowFailedDownloads();
+                }
+            }
+            catch(Exception ex)
+            {
+                _dialogService.ShowAndLogException(ex);
+            }
+        }
+
         protected override List<MenuCommand> BuildMenu()
         {
             List<MenuCommand> menuCommands = base.BuildMenu();
@@ -272,6 +313,7 @@ namespace TwitchLeecher.Gui.ViewModels
             }
 
             menuCommands.Add(new MenuCommand(OpenDownloadFolderCommand, "Open Download Folder", "FolderOpen", 230));
+            menuCommands.Add(new MenuCommand(OpenFailedDownloadsCommand, "View All Failed Downloads", "Close", 230));
 
             return menuCommands;
         }
