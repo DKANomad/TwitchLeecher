@@ -92,7 +92,7 @@
                         <ColumnDefinition Width="15" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Application ID" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="0" Text="Application ID (restart required)" VerticalAlignment="Center" HorizontalAlignment="Right" />
                     <ComboBox Grid.Column="2" IsEditable="True" Text="{Binding CurrentPreferences.AppApiKey, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding CurrentPreferences.AppApiKey}" VerticalAlignment="Center" />
                 </Grid>
 
@@ -102,7 +102,7 @@
                         <ColumnDefinition Width="15" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Api Key" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="0" Text="Api Key (restart required)" VerticalAlignment="Center" HorizontalAlignment="Right" />
                     <ComboBox Grid.Column="2" IsEditable="True" Text="{Binding CurrentPreferences.AppWebApiKey, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding CurrentPreferences.AppWebApiKey}" VerticalAlignment="Center" />
                 </Grid>
             </Grid>

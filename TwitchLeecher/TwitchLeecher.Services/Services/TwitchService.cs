@@ -49,8 +49,6 @@ namespace TwitchLeecher.Services.Services
         private const int TWITCH_MAX_LOAD_LIMIT = 100;
 
         private const string TWITCH_CLIENT_ID_HEADER = "Client-ID";
-        private const string TWITCH_CLIENT_ID = "37v97169hnj8kaoq8fs3hzz8v6jezdj";
-        private const string TWITCH_CLIENT_ID_WEB = "kimne78kx3ncx6brgo4mv6wki5h1ko";
         private const string TWITCH_V5_ACCEPT_HEADER = "Accept";
         private const string TWITCH_V5_ACCEPT = "application/vnd.twitchtv.v5+json";
 
@@ -64,6 +62,9 @@ namespace TwitchLeecher.Services.Services
         private IProcessingService _processingService;
         private IEventAggregator _eventAggregator;
         private IPersistenceService _persistenceService;
+
+        private string _twitchClientId;
+        private string _twitchClientIdWeb;
 
         private Timer _downloadTimer;
 
@@ -93,6 +94,9 @@ namespace TwitchLeecher.Services.Services
             _processingService = processingService;
             _eventAggregator = eventAggregator;
             _persistenceService = persistenceService;
+
+            _twitchClientId = _preferencesService.CurrentPreferences.AppApiKey;
+            _twitchClientIdWeb = preferencesService.CurrentPreferences.AppWebApiKey;
 
             _videos = new ObservableCollection<TwitchVideo>();
             _videos.CollectionChanged += Videos_CollectionChanged;
@@ -168,7 +172,7 @@ namespace TwitchLeecher.Services.Services
         private WebClient CreatePublicApiWebClient()
         {
             WebClient wc = new WebClient();
-            wc.Headers.Add(TWITCH_CLIENT_ID_HEADER, TWITCH_CLIENT_ID);
+            wc.Headers.Add(TWITCH_CLIENT_ID_HEADER, _twitchClientId);
             wc.Headers.Add(TWITCH_V5_ACCEPT_HEADER, TWITCH_V5_ACCEPT);
             wc.Encoding = Encoding.UTF8;
             return wc;
@@ -177,7 +181,7 @@ namespace TwitchLeecher.Services.Services
         private WebClient CreatePrivateApiWebClient()
         {
             WebClient wc = new WebClient();
-            wc.Headers.Add(TWITCH_CLIENT_ID_HEADER, TWITCH_CLIENT_ID_WEB);
+            wc.Headers.Add(TWITCH_CLIENT_ID_HEADER, _twitchClientIdWeb);
             wc.Headers.Add(TWITCH_V5_ACCEPT_HEADER, TWITCH_V5_ACCEPT);
             wc.Encoding = Encoding.UTF8;
 
