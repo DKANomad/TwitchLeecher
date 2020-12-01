@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyProduct("Twitch Leecher")]
+[assembly: AssemblyProduct("Twitch Leecher EE")]
 [assembly: AssemblyDescription("Twitch Broadcast Downloader")]
 [assembly: AssemblyCompany("Franiac")]
 [assembly: AssemblyCopyright("Copyright © 2018 Dominik Rebitzer")]

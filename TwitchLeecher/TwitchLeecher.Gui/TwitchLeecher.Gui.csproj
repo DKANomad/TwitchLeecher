@@ -92,6 +92,7 @@
     <Compile Include="Services\NavigationService.cs" />
     <Compile Include="Services\NotificationService.cs" />
     <Compile Include="Services\SearchService.cs" />
+    <Compile Include="ViewModels\FailedDownloadsViewVM.cs" />
     <Compile Include="ViewModels\LogViewVM.cs" />
     <Compile Include="ViewModels\DownloadViewVM.cs" />
     <Compile Include="ViewModels\MainWindowVM.cs" />
@@ -106,6 +107,9 @@
     <Compile Include="ViewModels\WelcomeViewVM.cs" />
     <Compile Include="Views\DownloadsView.xaml.cs">
       <DependentUpon>DownloadsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FailedDownloadsView.xaml.cs">
+      <DependentUpon>FailedDownloadsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\NotificationStrip.xaml.cs">
       <DependentUpon>NotificationStrip.xaml</DependentUpon>
@@ -168,6 +172,10 @@
     <Page Include="Views\DownloadsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\FailedDownloadsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\NotificationStrip.xaml">
       <SubType>Designer</SubType>

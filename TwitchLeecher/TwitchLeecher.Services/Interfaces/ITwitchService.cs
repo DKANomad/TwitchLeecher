@@ -24,7 +24,7 @@ namespace TwitchLeecher.Services.Interfaces
 
         void Search(SearchParameters searchParams);
 
-        void Enqueue(DownloadParameters downloadParams);
+        void Enqueue(DownloadParameters downloadParams, bool createDownloadRecord = false, string id = null);
 
         void Cancel(string id);
 
@@ -35,6 +35,8 @@ namespace TwitchLeecher.Services.Interfaces
         void Pause();
 
         void Resume();
+
+        bool IsPaused();
 
         bool CanShutdown();
 
