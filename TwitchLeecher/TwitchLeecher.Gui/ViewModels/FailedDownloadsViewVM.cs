@@ -20,12 +20,14 @@ namespace TwitchLeecher.Gui.ViewModels
         private readonly INavigationService _navigationService;
         private readonly IPreferencesService _preferencesService;
         private readonly IPersistenceService _persistenceService;
+        private readonly IExportService _exportService;
 
         private ICommand _retryDownloadCommand;
         private ICommand _removeDonloadCommand;
         private ICommand _showLogCommand;
         private ICommand _purgeFailedDownloadsCommand;
         private ICommand _navigateBackCommand;
+        private ICommand _exportVideoIdsToFileCommand;
 
         private readonly object _commandLockObject;
         #endregion
@@ -36,13 +38,15 @@ namespace TwitchLeecher.Gui.ViewModels
             IDialogService dialogService,
             INavigationService navigationService,
             IPreferencesService preferencesService,
-            IPersistenceService persistenceService)
+            IPersistenceService persistenceService,
+            IExportService exportService)
         {
             _twitchService = twitchService;
             _dialogService = dialogService;
             _navigationService = navigationService;
             _preferencesService = preferencesService;
             _persistenceService = persistenceService;
+            _exportService = exportService;
 
             _persistenceService.PropertyChanged += PersistenceService_PropertyChanged;
 
@@ -126,6 +130,19 @@ namespace TwitchLeecher.Gui.ViewModels
                 }
 
                 return _navigateBackCommand;
+            }
+        }
+
+        public ICommand ExportVideoIdsToFileCommand
+        {
+            get
+            {
+                if (_exportVideoIdsToFileCommand == null)
+                {
+                    _exportVideoIdsToFileCommand = new DelegateCommand(ExportIdsToFile);
+                }
+
+                return _exportVideoIdsToFileCommand;
             }
         }
 
@@ -236,6 +253,21 @@ namespace TwitchLeecher.Gui.ViewModels
             }
         }
 
+        private void ExportIdsToFile()
+        {
+            try
+            {
+                lock(_commandLockObject)
+                {
+                    _exportService.ExportToFile(FailedDownloads.ToList(), "failedDownloads", "https://www.twitch.tv/videos/{0}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowAndLogException(ex);
+            }
+        }
+
         protected override List<MenuCommand> BuildMenu()
         {
             List<MenuCommand> menuCommands = base.BuildMenu();
@@ -246,6 +278,7 @@ namespace TwitchLeecher.Gui.ViewModels
             }
 
             menuCommands.Add(new MenuCommand(PurgeFailedDownloadsCommand, "Purge Failed Downloads", "Ban", 230));
+            menuCommands.Add(new MenuCommand(ExportVideoIdsToFileCommand, "Export Video Ids", "File", 230));
             menuCommands.Add(new MenuCommand(NavigateBackCommand, "Cancel", "Close", 230));
 
             return menuCommands;

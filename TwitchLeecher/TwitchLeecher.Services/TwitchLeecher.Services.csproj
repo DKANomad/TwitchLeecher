@@ -69,6 +69,7 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Interfaces\IDownloadService.cs" />
+    <Compile Include="Interfaces\IExportService.cs" />
     <Compile Include="Interfaces\IPersistenceService.cs" />
     <Compile Include="Interfaces\IProcessingService.cs" />
     <Compile Include="Interfaces\IFilenameService.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Interfaces\IUpdateService.cs" />
     <Compile Include="Modules\ServiceModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ExportService.cs" />
     <Compile Include="Services\FilenameService.cs" />
     <Compile Include="Services\FolderService.cs" />
     <Compile Include="Services\LogService.cs" />
