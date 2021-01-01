@@ -30,26 +30,47 @@ namespace TwitchLeecher.Services.Services
         public void ExportToFile(List<TwitchVideoDownload> downloads, string fileName, string formattedString = null)
         {
             var path = Path.Combine(_folderService.GetDownloadFolder(), $"{fileName}_{GetUnixTimestamp(DateTime.Now)}_export.txt");
+            var errorStringBuilder = new StringBuilder();
             
 
             using (var fs = new FileStream(path, FileMode.OpenOrCreate))
             {
                 var sb = new StringBuilder();
+                var rowCount = 1;
 
                 foreach (var download in downloads)
                 {
-                    string fString;
-                    if (!string.IsNullOrWhiteSpace(formattedString))
+                    try
                     {
-                        fString = string.Format(formattedString, download.DownloadParams.Video.Id);
-                    }
-                    else
-                    {
-                        fString = download.DownloadParams.Video.Id;
-                    }
+                        string fString;
+                        if (!string.IsNullOrWhiteSpace(formattedString))
+                        {
+                            fString = string.Format(formattedString, download.DownloadParams.Video.Id);
+                        }
+                        else
+                        {
+                            fString = download.DownloadParams.Video.Id;
+                        }
 
-                    sb.AppendLine(fString);
+                        sb.AppendLine(fString);
+                    }
+                    catch(Exception ex)
+                    {
+                        if (download == null)
+                        {
+                            errorStringBuilder.AppendLine($"There was no download data for video number {rowCount} in the list");
+                        }
+                        else
+                        {
+                            errorStringBuilder.AppendLine($"---- Error getting download link: {ex.Message} -- {download.DownloadParams}");
+                        }
+
+                        errorStringBuilder.AppendLine("---------------------");
+                    }
+                    rowCount++;
                 }
+                errorStringBuilder.AppendLine("---------------------");
+                sb.Append(errorStringBuilder.ToString());
 
                 var bytes = Encoding.UTF8.GetBytes(sb.ToString());
                 fs.Write(bytes, 0, bytes.Length);
